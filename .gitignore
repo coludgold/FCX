@@ -1,78 +1,39 @@
 ```
-# Build results
-[Bb]in/
-[Oo]bj/
-[Dd]ebug/
-[Rr]elease/
-x64/
-x86/
-[Dd]epends/
-
-# Visual Studio files
+# Build artifacts
+*.obj
+*.exe
+*.dll
+*.pdb
 *.user
 *.userosscache
 *.suo
-*.csproj.user
-*.vbproj.user
-*.fsproj.user
-*.userprefs
+*.cache
+*.ilk
+*.exp
+*.lib
+*.iobj
+*.ipdb
+*.builds
+*.baml
 
-# Visual Studio Code files
-.vscode/
-
-# Compiled binaries
-*.exe
-*.dll
-*.so
-*.dylib
-
-# Logs
-*.log
-
-# User-specific configurations
+# Visual Studio files
 .vs/
 *.VC.db
 *.VC.VC.opendb
 
-# Windows
-Thumbs.db
-ehthumbs.db
-Icon?
-desktop.ini
+# Visual Studio Code files
+.vscode/
 
-# macOS
-.DS_Store
+# Output directory
+bin/
+obj/
+Debug/
+Release/
+x64/
+x86/
+Debug*/
+Release*/
 
-# Temporary files
-*.tmp
-*.temp
-*.bak
-
-# Environment files
-.env
-.env.local
-*.env.*
-
-# Package manager caches
-.nuget/
+# Dependencies
 packages/
-
-# IDE
-.idea/
-*.swp
-*.swo
-
-# Coverage
-coverage/
-*.coverage
-.htmlcov/
-
-# Python (if any Python files exist in project)
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-.Python
-*.egg-info/
-.eggs/
 ```
