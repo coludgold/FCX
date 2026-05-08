@@ -15,6 +15,15 @@
         <converters:UsageToColorConverter x:Key="UsageToColorConverter"/>
         <converters:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
         
+        <!-- 状态枚举数组 -->
+        <x:Array x:Key="LocationStatusArray" Type="local:LocationStatus" xmlns:local="clr-namespace:LineSideWarehouse.Models">
+            <local:LocationStatus>Available</local:LocationStatus>
+            <local:LocationStatus>Partial</local:LocationStatus>
+            <local:LocationStatus>Full</local:LocationStatus>
+            <local:LocationStatus>Reserved</local:LocationStatus>
+            <local:LocationStatus>Maintenance</local:LocationStatus>
+        </x:Array>
+        
         <!-- 状态指示器样式 -->
         <Style x:Key="StatusIndicatorStyle" TargetType="Border">
             <Setter Property="Width" Value="12"/>
@@ -116,17 +125,8 @@
                     
                     <!-- 状态过滤 -->
                     <TextBlock Text="状态:" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                    <ComboBox SelectedItem="{Binding FilterStatus}" Width="120" Margin="0,0,15,0">
-                        <ComboBox.ItemsSource>
-                            <x:Array Type="sys:Object" xmlns:sys="clr-namespace:System;assembly=mscorlib">
-                                <x:Null/>
-                                <local:LocationStatus xmlns:local="clr-namespace:LineSideWarehouse.Models">Available</local:LocationStatus>
-                                <local:LocationStatus>Partial</local:LocationStatus>
-                                <local:LocationStatus>Full</local:LocationStatus>
-                                <local:LocationStatus>Reserved</local:LocationStatus>
-                                <local:LocationStatus>Maintenance</local:LocationStatus>
-                            </x:Array>
-                        </ComboBox.ItemsSource>
+                    <ComboBox SelectedItem="{Binding FilterStatus}" Width="120" Margin="0,0,15,0"
+                              ItemsSource="{StaticResource LocationStatusArray}">
                         <ComboBox.ItemTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding Converter={StaticResource StatusToTextConverter}}"/>
