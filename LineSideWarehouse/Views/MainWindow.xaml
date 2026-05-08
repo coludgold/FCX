@@ -1,0 +1,398 @@
+<Window x:Class="LineSideWarehouse.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:converters="clr-namespace:LineSideWarehouse.Converters"
+        mc:Ignorable="d"
+        Title="线边仓库位管理系统" Height="800" Width="1400"
+        WindowStartupLocation="CenterScreen"
+        Background="#F5F5F5">
+
+    <Window.Resources>
+        <converters:StatusToColorConverter x:Key="StatusToColorConverter"/>
+        <converters:StatusToTextConverter x:Key="StatusToTextConverter"/>
+        <converters:UsageToColorConverter x:Key="UsageToColorConverter"/>
+        <converters:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
+        
+        <!-- 状态指示器样式 -->
+        <Style x:Key="StatusIndicatorStyle" TargetType="Border">
+            <Setter Property="Width" Value="12"/>
+            <Setter Property="Height" Value="12"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Margin" Value="0,0,8,0"/>
+        </Style>
+        
+        <!-- 按钮样式 -->
+        <Style x:Key="ActionButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#2196F3"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="16,8"/>
+            <Setter Property="Margin" Value="4"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#1976D2"/>
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Background" Value="#BDBDBD"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- 顶部标题栏 -->
+        <Border Grid.Row="0" Background="#1976D2" Padding="20,15">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="📦" FontSize="28" Margin="0,0,15,0"/>
+                    <StackPanel>
+                        <TextBlock Text="线边仓库位管理系统" FontSize="24" FontWeight="Bold" Foreground="White"/>
+                        <TextBlock Text="Line Side Warehouse Location Management System" FontSize="12" Foreground="#BBDEFB" Margin="0,2,0,0"/>
+                    </StackPanel>
+                </StackPanel>
+                
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Border Background="#4CAF50" CornerRadius="4" Padding="15,8" Margin="5">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="总库位：" Foreground="White" FontSize="14"/>
+                            <TextBlock Text="{Binding TotalCount}" Foreground="White" FontSize="14" FontWeight="Bold" Margin="5,0,0,0"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Background="#FF9800" CornerRadius="4" Padding="15,8" Margin="5">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="空闲：" Foreground="White" FontSize="14"/>
+                            <TextBlock Text="{Binding AvailableCount}" Foreground="White" FontSize="14" FontWeight="Bold" Margin="5,0,0,0"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Background="#F44336" CornerRadius="4" Padding="15,8" Margin="5">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="占用：" Foreground="White" FontSize="14"/>
+                            <TextBlock Text="{Binding OccupiedCount}" Foreground="White" FontSize="14" FontWeight="Bold" Margin="5,0,0,0"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- 工具栏 -->
+        <Border Grid.Row="1" Background="White" Padding="15,10" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <!-- 搜索框 -->
+                    <Border Background="#F5F5F5" CornerRadius="4" Padding="10,5" Margin="0,0,15,0">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="200"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="🔍" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                            <TextBox Grid.Column="1" 
+                                     Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                                     Background="Transparent" 
+                                     BorderThickness="0"
+                                     VerticalContentAlignment="Center"
+                                     FontSize="14"/>
+                        </Grid>
+                    </Border>
+                    
+                    <!-- 状态过滤 -->
+                    <TextBlock Text="状态:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <ComboBox SelectedItem="{Binding FilterStatus}" Width="120" Margin="0,0,15,0">
+                        <ComboBox.ItemsSource>
+                            <x:Array Type="sys:Object" xmlns:sys="clr-namespace:System;assembly=mscorlib">
+                                <x:Null/>
+                                <local:LocationStatus xmlns:local="clr-namespace:LineSideWarehouse.Models">Available</local:LocationStatus>
+                                <local:LocationStatus>Partial</local:LocationStatus>
+                                <local:LocationStatus>Full</local:LocationStatus>
+                                <local:LocationStatus>Reserved</local:LocationStatus>
+                                <local:LocationStatus>Maintenance</local:LocationStatus>
+                            </x:Array>
+                        </ComboBox.ItemsSource>
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Converter={StaticResource StatusToTextConverter}}"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
+                
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="➕ 新建库位" Command="{Binding AddNewLocationCommand}" Style="{StaticResource ActionButtonStyle}"/>
+                    <Button Content="🔄 刷新" Command="{Binding RefreshCommand}" Style="{StaticResource ActionButtonStyle}" Background="#4CAF50"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- 主内容区域 - 库位列表 -->
+        <Grid Grid.Row="2" Margin="15">
+            <DataGrid ItemsSource="{Binding Locations}" 
+                      SelectedItem="{Binding SelectedLocation}"
+                      AutoGenerateColumns="False"
+                      CanUserAddRows="False"
+                      CanUserDeleteRows="False"
+                      IsReadOnly="True"
+                      GridLinesVisibility="Horizontal"
+                      HeadersVisibility="Column"
+                      Background="White"
+                      BorderBrush="#E0E0E0"
+                      RowHeight="50">
+                
+                <DataGrid.ColumnHeaderStyle>
+                    <Style TargetType="DataGridColumnHeader">
+                        <Setter Property="Background" Value="#F5F5F5"/>
+                        <Setter Property="Foreground" Value="#424242"/>
+                        <Setter Property="FontWeight" Value="SemiBold"/>
+                        <Setter Property="Padding" Value="12,10"/>
+                        <Setter Property="BorderThickness" Value="0,0,1,1"/>
+                        <Setter Property="BorderBrush" Value="#E0E0E0"/>
+                    </Style>
+                </DataGrid.ColumnHeaderStyle>
+                
+                <DataGrid.CellStyle>
+                    <Style TargetType="DataGridCell">
+                        <Setter Property="Padding" Value="12,8"/>
+                        <Setter Property="BorderThickness" Value="0"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="#E3F2FD"/>
+                                <Setter Property="Foreground" Value="#1976D2"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.CellStyle>
+                
+                <DataGrid.Columns>
+                    <!-- 状态指示器 -->
+                    <DataGridTemplateColumn Header="状态" Width="80">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <Border Style="{StaticResource StatusIndicatorStyle}"
+                                            Background="{Binding Status, Converter={StaticResource StatusToColorConverter}}"/>
+                                    <TextBlock Text="{Binding Status, Converter={StaticResource StatusToTextConverter}}"
+                                               VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    
+                    <DataGridTextColumn Header="库位编号" Binding="{Binding LocationId}" Width="100"/>
+                    <DataGridTextColumn Header="库位名称" Binding="{Binding LocationName}" Width="120"/>
+                    <DataGridTextColumn Header="物料编码" Binding="{Binding MaterialCode}" Width="120"/>
+                    <DataGridTextColumn Header="物料名称" Binding="{Binding MaterialName}" Width="150"/>
+                    
+                    <!-- 数量进度条 -->
+                    <DataGridTemplateColumn Header="库存数量" Width="150">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <ProgressBar Value="{Binding UsagePercentage}" 
+                                                 Minimum="0" Maximum="100"
+                                                 Height="20"
+                                                 Margin="0,0,10,0">
+                                        <ProgressBar.Template>
+                                            <ControlTemplate>
+                                                <Border Background="#E0E0E0" CornerRadius="3">
+                                                    <Border Name="PART_Tracker" CornerRadius="3">
+                                                        <Border Name="PART_Indicator" 
+                                                                Background="{Binding UsagePercentage, Converter={StaticResource UsageToColorConverter}}"
+                                                                CornerRadius="3"
+                                                                HorizontalAlignment="Left"/>
+                                                    </Border>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </ProgressBar.Template>
+                                    </ProgressBar>
+                                    <TextBlock Grid.Column="1" 
+                                               Text="{Binding CurrentQuantity, StringFormat={}{0}/{1}}"
+                                               VerticalAlignment="Center"
+                                               FontSize="12"/>
+                                </Grid>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    
+                    <DataGridTextColumn Header="最大容量" Binding="{Binding MaxCapacity}" Width="80"/>
+                    <DataGridTextColumn Header="使用率" Binding="{Binding UsagePercentage, StringFormat={}{0:F1}%}" Width="80"/>
+                    <DataGridTextColumn Header="最后更新" Binding="{Binding LastUpdateTime, StringFormat={}{0:yyyy-MM-dd HH:mm}}" Width="140"/>
+                    <DataGridTextColumn Header="备注" Binding="{Binding Remark}" Width="*"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+
+        <!-- 底部操作栏 -->
+        <Border Grid.Row="2" VerticalAlignment="Bottom" Margin="15,0,15,15">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button Content="📥 入库" 
+                        Command="{Binding OpenInboundDialogCommand}"
+                        Style="{StaticResource ActionButtonStyle}"
+                        IsEnabled="{Binding SelectedLocation.IsAvailable, Converter={StaticResource InverseBooleanConverter}, FallbackValue=False}"/>
+                
+                <Button Content="📤 出库" 
+                        Command="{Binding OpenOutboundDialogCommand}"
+                        Style="{StaticResource ActionButtonStyle}"
+                        Background="#FF9800"
+                        IsEnabled="{Binding SelectedLocation.CurrentQuantity, Converter={StaticResource InverseBooleanConverter}, FallbackValue=False}"/>
+                
+                <Button Content="✏️ 编辑" 
+                        Command="{Binding OpenEditDialogCommand}"
+                        Style="{StaticResource ActionButtonStyle}"
+                        Background="#9C27B0"
+                        IsEnabled="{Binding SelectedLocation, Converter={StaticResource InverseBooleanConverter}, FallbackValue=False}"/>
+                
+                <Button Content="🗑️ 删除" 
+                        Command="{Binding DeleteLocationCommand}"
+                        Style="{StaticResource ActionButtonStyle}"
+                        Background="#F44336"
+                        IsEnabled="{Binding SelectedLocation, Converter={StaticResource InverseBooleanConverter}, FallbackValue=False}"/>
+            </StackPanel>
+        </Border>
+
+        <!-- 入库对话框 -->
+        <Popup IsOpen="{Binding IsInboundDialogOpen}" 
+               PlacementTarget="{Binding ElementName=MainGrid}"
+               Placement="Center"
+               AllowsTransparency="True"
+               PopupAnimation="Slide">
+            <Border Background="White" 
+                    CornerRadius="8" 
+                    Padding="30"
+                    BorderBrush="#E0E0E0"
+                    BorderThickness="1"
+                    MinWidth="400">
+                <StackPanel>
+                    <TextBlock Text="📥 入库操作" FontSize="20" FontWeight="Bold" Margin="0,0,0,20"/>
+                    
+                    <TextBlock Text="库位名称:" Margin="0,0,0,5"/>
+                    <TextBlock Text="{Binding SelectedLocation.LocationName}" FontWeight="Bold" Margin="0,0,0,15"/>
+                    
+                    <TextBlock Text="物料编码:" Margin="0,0,0,5"/>
+                    <TextBox Text="{Binding InboundMaterialCode, UpdateSourceTrigger=PropertyChanged}" 
+                             Margin="0,0,0,15" Padding="10" FontSize="14"/>
+                    
+                    <TextBlock Text="物料名称:" Margin="0,0,0,5"/>
+                    <TextBox Text="{Binding InboundMaterialName, UpdateSourceTrigger=PropertyChanged}" 
+                             Margin="0,0,0,15" Padding="10" FontSize="14"/>
+                    
+                    <TextBlock Text="入库数量:" Margin="0,0,0,5"/>
+                    <TextBox Text="{Binding InboundQuantity, UpdateSourceTrigger=PropertyChanged}" 
+                             Margin="0,0,0,20" Padding="10" FontSize="14"/>
+                    
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <Button Content="取消" Command="{Binding CancelInboundCommand}" 
+                                Style="{StaticResource ActionButtonStyle}" Background="#9E9E9E"/>
+                        <Button Grid.Column="1" Content="确认入库" Command="{Binding ExecuteInboundCommand}" 
+                                Style="{StaticResource ActionButtonStyle}"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+        </Popup>
+
+        <!-- 出库对话框 -->
+        <Popup IsOpen="{Binding IsOutboundDialogOpen}" 
+               PlacementTarget="{Binding ElementName=MainGrid}"
+               Placement="Center"
+               AllowsTransparency="True"
+               PopupAnimation="Slide">
+            <Border Background="White" 
+                    CornerRadius="8" 
+                    Padding="30"
+                    BorderBrush="#E0E0E0"
+                    BorderThickness="1"
+                    MinWidth="400">
+                <StackPanel>
+                    <TextBlock Text="📤 出库操作" FontSize="20" FontWeight="Bold" Margin="0,0,0,20"/>
+                    
+                    <TextBlock Text="库位名称:" Margin="0,0,0,5"/>
+                    <TextBlock Text="{Binding SelectedLocation.LocationName}" FontWeight="Bold" Margin="0,0,0,5"/>
+                    
+                    <TextBlock Text="当前库存:" Margin="0,0,0,5"/>
+                    <TextBlock Text="{Binding SelectedLocation.CurrentQuantity}" FontWeight="Bold" FontSize="16" Margin="0,0,0,15"/>
+                    
+                    <TextBlock Text="出库数量:" Margin="0,0,0,5"/>
+                    <TextBox Text="{Binding OutboundQuantity, UpdateSourceTrigger=PropertyChanged}" 
+                             Margin="0,0,0,20" Padding="10" FontSize="14"/>
+                    
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <Button Content="取消" Command="{Binding CancelOutboundCommand}" 
+                                Style="{StaticResource ActionButtonStyle}" Background="#9E9E9E"/>
+                        <Button Grid.Column="1" Content="确认出库" Command="{Binding ExecuteOutboundCommand}" 
+                                Style="{StaticResource ActionButtonStyle}"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+        </Popup>
+
+        <!-- 编辑对话框 -->
+        <Popup IsOpen="{Binding IsEditDialogOpen}" 
+               PlacementTarget="{Binding ElementName=MainGrid}"
+               Placement="Center"
+               AllowsTransparency="True"
+               PopupAnimation="Slide">
+            <Border Background="White" 
+                    CornerRadius="8" 
+                    Padding="30"
+                    BorderBrush="#E0E0E0"
+                    BorderThickness="1"
+                    MinWidth="400">
+                <StackPanel>
+                    <TextBlock Text="✏️ 编辑库位" FontSize="20" FontWeight="Bold" Margin="0,0,0,20"/>
+                    
+                    <TextBlock Text="库位名称:" Margin="0,0,0,5"/>
+                    <TextBox Text="{Binding SelectedLocation.LocationName, UpdateSourceTrigger=PropertyChanged}" 
+                             Margin="0,0,0,15" Padding="10" FontSize="14"/>
+                    
+                    <TextBlock Text="最大容量:" Margin="0,0,0,5"/>
+                    <TextBox Text="{Binding SelectedLocation.MaxCapacity, UpdateSourceTrigger=PropertyChanged}" 
+                             Margin="0,0,0,15" Padding="10" FontSize="14"/>
+                    
+                    <TextBlock Text="备注:" Margin="0,0,0,5"/>
+                    <TextBox Text="{Binding SelectedLocation.Remark, UpdateSourceTrigger=PropertyChanged}" 
+                             Margin="0,0,0,20" Padding="10" FontSize="14" Height="80" TextWrapping="Wrap" AcceptsReturn="True"/>
+                    
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <Button Content="取消" Command="{Binding CancelEditCommand}" 
+                                Style="{StaticResource ActionButtonStyle}" Background="#9E9E9E"/>
+                        <Button Grid.Column="1" Content="保存" Command="{Binding SaveEditCommand}" 
+                                Style="{StaticResource ActionButtonStyle}"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+        </Popup>
+    </Grid>
+</Window>

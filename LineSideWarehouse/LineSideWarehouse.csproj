@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+    <RootNamespace>LineSideWarehouse</RootNamespace>
+    <AssemblyName>LineSideWarehouse</AssemblyName>
+    <Version>1.0.0</Version>
+    <Authors>Line Side Warehouse Team</Authors>
+    <Company>Manufacturing Solutions</Company>
+    <Product>线边仓库位管理系统</Product>
+    <Description>WPF 线边仓库位管理系统 - 用于管理生产线边的物料存储位置</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+</Project>
